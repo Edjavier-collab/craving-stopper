@@ -145,8 +145,15 @@ function AppContent() {
         <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-6">
             <div className="max-w-sm mx-auto space-y-4">
                 {/* Header Widget */}
-                <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
-                    <h1 className="text-xl font-bold text-neumo-700 text-center">Craving Stopper</h1>
+                <div className="bg-neumo-200 rounded-3xl p-8 shadow-neumo">
+                    <h1 className="text-6xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
+                        CRAVING STOPPER
+                    </h1>
+                    <div className="text-center mt-2">
+                        <div className="inline-block text-lg font-bold text-neumo-600 drop-shadow-[0_0_10px_rgba(75,85,99,0.5)]">
+                            RESIST. OVERCOME. THRIVE.
+                        </div>
+                    </div>
                 </div>
 
                 {/* Main Content */}
@@ -260,7 +267,11 @@ const Stopwatch = ({ onLog, logs = [] }) => {
             {/* Timer Widget */}
             <div className="bg-neumo-200 rounded-3xl p-8 shadow-neumo">
                 <div className="text-center">
-                    <div className="bg-neumo-200 rounded-2xl p-6 mb-6 shadow-neumo-inset">
+                    <div className={`bg-neumo-200 rounded-2xl p-6 mb-6 transition-all duration-300 ${
+                        isRunning 
+                            ? 'shadow-[inset_4px_4px_8px_#c5c5c5,inset_-4px_-4px_8px_#ffffff,0_0_20px_rgba(74,222,128,0.6)] animate-pulse border-2 border-green-300' 
+                            : 'shadow-neumo-inset'
+                    }`}>
                         <div className="font-mono text-4xl font-medium text-neumo-800 tracking-wide">
                             {formatTime(time)}
                         </div>
@@ -277,9 +288,16 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                                 : 'bg-neumo-200 text-soft-green shadow-neumo hover:shadow-neumo-sm active:shadow-neumo-pressed'
                         }`}
                     >
-                        {isRunning ? <Square size={24} /> : <Play size={24} className="ml-1" />}
-                        <span className="ml-2 text-base font-semibold">
-                            {isRunning ? 'Stop' : 'Start'}
+                        {isRunning ? 
+                            <Square size={24} className="text-red-400 drop-shadow-[0_0_10px_rgba(248,113,113,0.6)] filter brightness-110" fill="currentColor" /> : 
+                            <Play size={24} className="ml-1 text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.6)] filter brightness-110" fill="currentColor" />
+                        }
+                        <span className={`ml-2 text-2xl font-black tracking-wide ${
+                            isRunning 
+                                ? 'text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.8)] animate-pulse' 
+                                : 'text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]'
+                        } filter brightness-110 contrast-125`}>
+                            {isRunning ? 'STOP' : 'START'}
                         </span>
                     </button>
                     
@@ -378,7 +396,7 @@ const CalendarView = ({ logs }) => {
                             <span className={`${isSameDay(day, new Date()) ? 'bg-neumo-700 text-white rounded-lg h-7 w-7 flex items-center justify-center text-xs' : 'text-neumo-600'}`}>
                                 {format(day, 'd')}
                             </span>
-                            {hasLogs && <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-soft-green rounded-full shadow-neumo-sm"></div>}
+                            {hasLogs && <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-blue-300 rounded-full shadow-neumo-sm"></div>}
                         </div>
                     );
                 })}
@@ -431,32 +449,6 @@ const TrendsView = ({ logs }) => {
                 </div>
             </div>
             
-            {/* Progress Widget */}
-            <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <p className="text-sm text-neumo-500">This Week</p>
-                        <p className="text-lg font-medium text-neumo-700">
-                            {validLogs.filter(log => {
-                                const weekAgo = new Date();
-                                weekAgo.setDate(weekAgo.getDate() - 7);
-                                return new Date(log.date) > weekAgo;
-                            }).length} sessions
-                        </p>
-                    </div>
-
-                </div>
-                <div className="w-full bg-neumo-200 rounded-full h-2 shadow-neumo-inset">
-                    <div 
-                        className="bg-soft-green h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${Math.min(100, (validLogs.filter(log => {
-                            const weekAgo = new Date();
-                            weekAgo.setDate(weekAgo.getDate() - 7);
-                            return new Date(log.date) > weekAgo;
-                        }).length / 7) * 100)}%` }}
-                    ></div>
-                </div>
-            </div>
             
             {/* Calendar */}
             <CalendarView logs={validLogs} />
@@ -475,7 +467,7 @@ const TrendsView = ({ logs }) => {
                                 labelStyle={{ fontWeight: '500', color: '#495057' }}
                                 formatter={(value) => [`${value.toFixed(0)}s`, 'Duration']}
                             />
-                            <Bar dataKey="duration" fill="#d4edda" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="duration" fill="#93c5fd" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
