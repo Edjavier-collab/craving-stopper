@@ -142,11 +142,11 @@ function AppContent() {
     };
 
     return (
-        <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-6">
+        <div className="min-h-screen bg-stone-100 font-sans text-stone-700 p-6">
             <div className="max-w-sm mx-auto space-y-4">
                 {/* Header Widget */}
-                <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
-                    <h1 className="text-xl font-bold text-neumo-700 text-center">Craving Stopper</h1>
+                <div className="bg-white rounded-3xl p-6 shadow-lg">
+                    <h1 className="text-xl font-bold text-stone-700 text-center">Craving Stopper</h1>
                 </div>
 
                 {/* Main Content */}
@@ -177,15 +177,15 @@ export default function App() {
 const NavButton = ({ icon: Icon, label, active, onClick }) => (
     <button
         onClick={onClick}
-        className={`bg-neumo-200 rounded-2xl p-4 flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
-            active ? 'shadow-neumo-pressed' : 'shadow-neumo hover:shadow-neumo-sm'
+        className={`bg-white rounded-2xl p-4 shadow-lg flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
+            active ? 'bg-stone-200' : 'hover:bg-stone-50'
         }`}
     >
         <Icon className={`h-5 w-5 mb-2 ${
-            active ? 'text-neumo-700' : 'text-neumo-500'
+            active ? 'text-stone-700' : 'text-stone-500'
         }`} />
         <span className={`text-xs font-medium ${
-            active ? 'text-neumo-700' : 'text-neumo-500'
+            active ? 'text-stone-700' : 'text-stone-500'
         }`}>{label}</span>
     </button>
 );
@@ -258,23 +258,21 @@ const Stopwatch = ({ onLog, logs = [] }) => {
     return (
         <>
             {/* Timer Widget */}
-            <div className="bg-neumo-200 rounded-3xl p-8 shadow-neumo">
+            <div className="bg-white rounded-3xl p-8 shadow-lg">
                 <div className="text-center">
-                    <div className="bg-neumo-200 rounded-2xl p-6 mb-6 shadow-neumo-inset">
-                        <div className="font-mono text-4xl font-medium text-neumo-800 tracking-wide">
+                    <div className="bg-stone-50 rounded-2xl p-6 mb-6">
+                        <div className="font-mono text-4xl font-medium text-stone-800 tracking-wide">
                             {formatTime(time)}
                         </div>
-                        <div className="text-sm text-neumo-500 mt-2">
+                        <div className="text-sm text-stone-500 mt-2">
                             {new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' })}
                         </div>
                     </div>
                     
                     <button
                         onClick={handleButtonClick}
-                        className={`w-40 h-16 rounded-full flex items-center justify-center border-0 transition-all duration-200 mx-auto ${
-                            isRunning 
-                                ? 'bg-neumo-200 text-soft-red shadow-neumo-pressed' 
-                                : 'bg-neumo-200 text-soft-green shadow-neumo hover:shadow-neumo-sm active:shadow-neumo-pressed'
+                        className={`w-40 h-16 rounded-full flex items-center justify-center shadow-xl border-2 transform transition-all duration-200 active:scale-95 mx-auto ${
+                            isRunning ? 'bg-rose-200 text-rose-700 border-rose-300 shadow-rose-200/50' : 'bg-emerald-200 text-emerald-700 border-emerald-300 shadow-emerald-200/50'
                         }`}
                     >
                         {isRunning ? <Square size={24} /> : <Play size={24} className="ml-1" />}
@@ -283,8 +281,8 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                         </span>
                     </button>
                     
-                    <h2 className="text-base font-medium text-neumo-600 mt-4 mb-2 text-center">You're doing great!! Keep Resisting 💪</h2>
-                    <p className="text-neumo-400 text-sm mt-2 px-4">
+                    <h2 className="text-base font-medium text-stone-600 mt-4 mb-2 text-center">You're doing great!! Keep Resisting 💪</h2>
+                    <p className="text-stone-400 text-sm mt-2 px-4">
                         {isRunning 
                             ? 'Press to stop and log your success!' 
                             : 'Press once to start. Press twice quickly to reset.'}
@@ -294,24 +292,24 @@ const Stopwatch = ({ onLog, logs = [] }) => {
             
             {/* Quick Stats Widget */}
             {logs.length > 0 && (
-                <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
+                <div className="bg-white rounded-3xl p-6 shadow-lg">
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className="text-sm text-neumo-500">Today</div>
+                            <div className="text-sm text-stone-500">Today</div>
                             <div className="flex items-center space-x-3 mt-1">
-                                <div className="bg-neumo-200 text-neumo-700 px-3 py-1 rounded-full text-sm font-medium shadow-neumo-inset-sm">
+                                <div className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium">
                                     {logs.filter(log => {
                                         const today = new Date();
                                         const logDate = new Date(log.date);
                                         return logDate.toDateString() === today.toDateString();
                                     }).length}
                                 </div>
-                                <span className="text-xs text-neumo-400">sessions</span>
+                                <span className="text-xs text-stone-400">sessions</span>
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-sm text-neumo-500">Best Streak</div>
-                            <div className="text-lg font-medium text-neumo-700 mt-1">
+                            <div className="text-sm text-stone-500">Best Streak</div>
+                            <div className="text-lg font-medium text-stone-700 mt-1">
                                 {Math.max(...logs.map(log => log.duration || 0)) > 0 ? 
                                     formatTime(Math.max(...logs.map(log => log.duration || 0))).split('.')[0] : 
                                     '00:00:00'
@@ -349,13 +347,13 @@ const CalendarView = ({ logs }) => {
     }, {});
 
     return (
-        <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
+        <div className="bg-white rounded-3xl p-6 shadow-lg">
             <div className="flex justify-between items-center mb-6">
-                <button onClick={prevMonth} className="p-2 rounded-full bg-neumo-200 shadow-neumo-sm hover:shadow-neumo-pressed transition-all duration-200"><ChevronLeft className="w-4 h-4 text-neumo-600" /></button>
-                <h2 className="font-medium text-neumo-700">{format(currentDate, 'MMMM yyyy')}</h2>
-                <button onClick={nextMonth} className="p-2 rounded-full bg-neumo-200 shadow-neumo-sm hover:shadow-neumo-pressed transition-all duration-200"><ChevronRight className="w-4 h-4 text-neumo-600" /></button>
+                <button onClick={prevMonth} className="p-2 rounded-full hover:bg-stone-100"><ChevronLeft className="w-4 h-4 text-stone-600" /></button>
+                <h2 className="font-medium text-stone-700">{format(currentDate, 'MMMM yyyy')}</h2>
+                <button onClick={nextMonth} className="p-2 rounded-full hover:bg-stone-100"><ChevronRight className="w-4 h-4 text-stone-600" /></button>
             </div>
-            <div className="grid grid-cols-7 gap-2 text-center text-xs text-neumo-400 mb-3">
+            <div className="grid grid-cols-7 gap-2 text-center text-xs text-stone-400 mb-3">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day} className="font-medium">{day}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-2">
@@ -366,19 +364,19 @@ const CalendarView = ({ logs }) => {
                     const hasLogs = dayLogs.length > 0;
                     const totalDuration = dayLogs.reduce((sum, log) => sum + log.duration, 0);
                     
-                    let intensityClass = 'bg-neumo-200 shadow-neumo-inset-sm';
+                    let intensityClass = 'bg-stone-50';
                     if (hasLogs) {
-                        if (totalDuration < 60000) intensityClass = 'bg-soft-green shadow-neumo-inset-sm'; // < 1 min
-                        else if (totalDuration < 300000) intensityClass = 'bg-soft-yellow shadow-neumo-inset-sm'; // < 5 mins
-                        else intensityClass = 'bg-soft-red shadow-neumo-inset-sm'; // >= 5 mins
+                        if (totalDuration < 60000) intensityClass = 'bg-emerald-100'; // < 1 min
+                        else if (totalDuration < 300000) intensityClass = 'bg-amber-100'; // < 5 mins
+                        else intensityClass = 'bg-rose-100'; // >= 5 mins
                     }
 
                     return (
                         <div key={day.toString()} className={`h-8 w-8 flex items-center justify-center rounded-lg text-sm font-medium relative ${intensityClass}`}>
-                            <span className={`${isSameDay(day, new Date()) ? 'bg-neumo-700 text-white rounded-lg h-7 w-7 flex items-center justify-center text-xs' : 'text-neumo-600'}`}>
+                            <span className={`${isSameDay(day, new Date()) ? 'bg-stone-700 text-white rounded-lg h-7 w-7 flex items-center justify-center text-xs' : 'text-stone-600'}`}>
                                 {format(day, 'd')}
                             </span>
-                            {hasLogs && <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-soft-green rounded-full shadow-neumo-sm"></div>}
+                            {hasLogs && <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-emerald-500 rounded-full"></div>}
                         </div>
                     );
                 })}
@@ -391,7 +389,7 @@ const CalendarView = ({ logs }) => {
 // --- Trends View Component ---
 const TrendsView = ({ logs }) => {
     if (!logs || logs.length === 0) {
-        return <div className="text-center py-12 text-neumo-500">No data yet. Start logging your cravings to see trends!</div>;
+        return <div className="text-center py-12 text-gray-500">No data yet. Start logging your cravings to see trends!</div>;
     }
 
     // Filter and validate logs
@@ -405,7 +403,7 @@ const TrendsView = ({ logs }) => {
     );
 
     if (validLogs.length === 0) {
-        return <div className="text-center py-12 text-neumo-500">No valid data yet. Start logging your cravings to see trends!</div>;
+        return <div className="text-center py-12 text-gray-500">No valid data yet. Start logging your cravings to see trends!</div>;
     }
 
     const data = validLogs
@@ -421,22 +419,22 @@ const TrendsView = ({ logs }) => {
         <div className="space-y-4">
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-3">
-                <div className="bg-neumo-200 p-5 rounded-3xl shadow-neumo">
-                    <p className="text-sm text-neumo-500">Total Sessions</p>
-                    <p className="text-2xl font-medium text-neumo-700 mt-1">{validLogs.length}</p>
+                <div className="bg-white p-5 rounded-3xl shadow-lg">
+                    <p className="text-sm text-stone-500">Total Sessions</p>
+                    <p className="text-2xl font-medium text-stone-700 mt-1">{validLogs.length}</p>
                 </div>
-                <div className="bg-neumo-200 p-5 rounded-3xl shadow-neumo">
-                    <p className="text-sm text-neumo-500">Best Time</p>
-                    <p className="text-2xl font-medium text-neumo-700 mt-1">{formatTime(longestHold).split('.')[0]}</p>
+                <div className="bg-white p-5 rounded-3xl shadow-lg">
+                    <p className="text-sm text-stone-500">Best Time</p>
+                    <p className="text-2xl font-medium text-stone-700 mt-1">{formatTime(longestHold).split('.')[0]}</p>
                 </div>
             </div>
             
             {/* Progress Widget */}
-            <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
+            <div className="bg-white rounded-3xl p-6 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                     <div>
-                        <p className="text-sm text-neumo-500">This Week</p>
-                        <p className="text-lg font-medium text-neumo-700">
+                        <p className="text-sm text-stone-500">This Week</p>
+                        <p className="text-lg font-medium text-stone-700">
                             {validLogs.filter(log => {
                                 const weekAgo = new Date();
                                 weekAgo.setDate(weekAgo.getDate() - 7);
@@ -446,9 +444,9 @@ const TrendsView = ({ logs }) => {
                     </div>
 
                 </div>
-                <div className="w-full bg-neumo-200 rounded-full h-2 shadow-neumo-inset">
+                <div className="w-full bg-stone-100 rounded-full h-2">
                     <div 
-                        className="bg-soft-green h-2 rounded-full transition-all duration-300" 
+                        className="bg-emerald-300 h-2 rounded-full transition-all duration-300" 
                         style={{ width: `${Math.min(100, (validLogs.filter(log => {
                             const weekAgo = new Date();
                             weekAgo.setDate(weekAgo.getDate() - 7);
@@ -462,20 +460,20 @@ const TrendsView = ({ logs }) => {
             <CalendarView logs={validLogs} />
 
             {/* Chart Widget */}
-            <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo">
-                <h3 className="font-medium text-neumo-700 mb-4">Recent Sessions</h3>
+            <div className="bg-white rounded-3xl p-6 shadow-lg">
+                <h3 className="font-medium text-stone-700 mb-4">Recent Sessions</h3>
                 <div className="h-48 w-full">
                     <ResponsiveContainer>
                         <BarChart data={data.slice(-7)} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ced4da" />
-                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6c757d' }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6c757d' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f4" />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#a8a29e' }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#a8a29e' }} />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#dee2e6', border: 'none', borderRadius: '1rem', boxShadow: '4px 4px 8px #c5c5c5, -4px -4px 8px #ffffff' }}
-                                labelStyle={{ fontWeight: '500', color: '#495057' }}
+                                contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '1rem', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                                labelStyle={{ fontWeight: '500', color: '#57534e' }}
                                 formatter={(value) => [`${value.toFixed(0)}s`, 'Duration']}
                             />
-                            <Bar dataKey="duration" fill="#d4edda" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="duration" fill="#a7f3d0" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
