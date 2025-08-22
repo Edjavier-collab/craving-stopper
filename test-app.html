@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test App</title>
+</head>
+<body>
+    <h1>Testing the App</h1>
+    <iframe src="http://localhost:5174/" width="100%" height="600" style="border: 1px solid #ccc;"></iframe>
+    <script>
+        // Listen for console messages from the iframe
+        window.addEventListener('message', function(e) {
+            console.log('Message from iframe:', e.data);
+        });
+        
+        setTimeout(() => {
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                try {
+                    console.log('App loaded successfully');
+                } catch(e) {
+                    console.error('Error accessing iframe:', e);
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
