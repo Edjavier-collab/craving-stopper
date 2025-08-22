@@ -150,7 +150,7 @@ function AppContent() {
                         CRAVING STOPPER
                     </h1>
                     <div className="text-center mt-2">
-                        <div className="inline-block text-lg font-bold text-neumo-600 drop-shadow-[0_0_10px_rgba(75,85,99,0.5)]">
+                        <div className="inline-block text-2xl font-black text-neumo-700 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.5)]">
                             RESIST. OVERCOME. THRIVE.
                         </div>
                     </div>
