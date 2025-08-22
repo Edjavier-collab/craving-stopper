@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Play, Square, History, BarChart2 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -15,6 +15,7 @@ const firebaseConfig = {
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
     appId: import.meta.env.VITE_FIREBASE_APP_ID || "YOUR_APP_ID"
 };
+
 
 // --- App ID ---
 const appId = import.meta.env.VITE_FIREBASE_APP_ID || 'default-craving-stopper';
@@ -56,46 +57,129 @@ export default function App() {
         return () => unsubscribe();
     }, []);
 
-    // --- Firestore Data Fetching Effect ---
+    // --- Data Loading Effect ---
     useEffect(() => {
-        if (user) {
+        const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+        
+        if (user && isFirebaseConfigured) {
+            // Use Firebase
             const cravingsCollectionPath = `artifacts/${appId}/users/${user.uid}/cravings`;
             const q = query(collection(db, cravingsCollectionPath));
             
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
-                const fetchedLogs = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    fetchedLogs.push({
-                        id: doc.id,
-                        ...data,
-                        // Convert Firestore Timestamp to JS Date object
-                        date: data.date?.toDate()
+                try {
+                    const fetchedLogs = [];
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        if (data && data.date && data.duration !== undefined) {
+                            fetchedLogs.push({
+                                id: doc.id,
+                                duration: Number(data.duration) || 0,
+                                // Convert Firestore Timestamp to JS Date object
+                                date: data.date?.toDate()
+                            });
+                        }
                     });
-                });
-                // Sort logs by date, newest first
-                fetchedLogs.sort((a, b) => b.date - a.date);
-                setLogs(fetchedLogs);
+                    // Sort logs by date, newest first
+                    fetchedLogs.sort((a, b) => b.date - a.date);
+                    setLogs(fetchedLogs);
+                } catch (error) {
+                    console.error("Error processing Firebase data:", error);
+                    loadFromLocalStorage();
+                }
             }, (error) => {
                 console.error("Error fetching craving logs: ", error);
+                // Fallback to localStorage on error
+                loadFromLocalStorage();
             });
 
             return () => unsubscribe();
+        } else {
+            // Use localStorage fallback - load immediately when Firebase is not configured
+            loadFromLocalStorage();
         }
     }, [user]);
 
+    // --- Load data from localStorage on app start ---
+    useEffect(() => {
+        const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+        if (!isFirebaseConfigured) {
+            // If Firebase is not configured, load localStorage data immediately
+            loadFromLocalStorage();
+        }
+    }, []);
+
+    // --- Load from Local Storage ---
+    const loadFromLocalStorage = () => {
+        try {
+            const storedLogs = JSON.parse(localStorage.getItem('cravingLogs') || '[]');
+            // Convert date strings back to Date objects and validate
+            const logsWithDates = storedLogs
+                .filter(log => log && log.date && log.duration !== undefined)
+                .map(log => ({
+                    ...log,
+                    date: new Date(log.date),
+                    duration: Number(log.duration) || 0
+                }))
+                .filter(log => !isNaN(log.date.getTime())); // Filter out invalid dates
+            
+            // Sort by date, newest first
+            logsWithDates.sort((a, b) => b.date - a.date);
+            setLogs(logsWithDates);
+        } catch (error) {
+            console.error('Error loading from localStorage:', error);
+            setLogs([]);
+        }
+    };
+
     // --- Add Log Function ---
     const addLog = async (duration) => {
-        if (user && duration > 0) {
-            try {
-                const cravingsCollectionPath = `artifacts/${appId}/users/${user.uid}/cravings`;
-                await addDoc(collection(db, cravingsCollectionPath), {
-                    duration: duration,
-                    date: serverTimestamp() 
-                });
-            } catch (error) {
-                console.error("Error adding document: ", error);
+        if (duration > 0) {
+            // Check if Firebase is properly configured
+            const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+            
+            if (user && isFirebaseConfigured) {
+                try {
+                    const cravingsCollectionPath = `artifacts/${appId}/users/${user.uid}/cravings`;
+                    await addDoc(collection(db, cravingsCollectionPath), {
+                        duration: duration,
+                        date: serverTimestamp() 
+                    });
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    // Fallback to localStorage if Firebase fails
+                    saveToLocalStorage(duration);
+                }
+            } else {
+                // Use localStorage as fallback
+                saveToLocalStorage(duration);
             }
+        } else {
+            console.log("Invalid duration, not logging");
+        }
+    };
+
+    // --- Local Storage Fallback ---
+    const saveToLocalStorage = (duration) => {
+        try {
+            const newLog = {
+                id: Date.now().toString(),
+                duration: Number(duration) || 0,
+                date: new Date()
+            };
+            
+            const existingLogs = JSON.parse(localStorage.getItem('cravingLogs') || '[]');
+            const updatedLogs = [newLog, ...existingLogs];
+            localStorage.setItem('cravingLogs', JSON.stringify(updatedLogs));
+            
+            // Update state immediately with proper date objects
+            const logsWithDates = updatedLogs.map(log => ({
+                ...log,
+                date: log.date instanceof Date ? log.date : new Date(log.date)
+            }));
+            setLogs(logsWithDates);
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
         }
     };
 
@@ -288,21 +372,34 @@ const CalendarView = ({ logs }) => {
 
 // --- Trends View Component ---
 const TrendsView = ({ logs }) => {
-    if (logs.length === 0) {
+    if (!logs || logs.length === 0) {
         return <div className="text-center py-12 text-gray-500">No data yet. Start logging your cravings to see trends!</div>;
     }
 
-    const data = logs
-        .filter(log => log.date) // Ensure log has a valid date
+    // Filter and validate logs
+    const validLogs = logs.filter(log => 
+        log && 
+        log.date && 
+        log.date instanceof Date && 
+        !isNaN(log.date.getTime()) && 
+        typeof log.duration === 'number' && 
+        log.duration >= 0
+    );
+
+    if (validLogs.length === 0) {
+        return <div className="text-center py-12 text-gray-500">No valid data yet. Start logging your cravings to see trends!</div>;
+    }
+
+    const data = validLogs
         .map(log => ({
             date: format(log.date, 'MMM d'),
             duration: log.duration / 1000, // convert to seconds
         }))
         .reverse(); // Show oldest first on the chart
 
-    const totalTimeResisted = logs.reduce((sum, log) => sum + log.duration, 0);
-    const averageDuration = logs.length > 0 ? totalTimeResisted / logs.length : 0;
-    const longestHold = logs.length > 0 ? Math.max(...logs.map(log => log.duration)) : 0;
+    const totalTimeResisted = validLogs.reduce((sum, log) => sum + (log.duration || 0), 0);
+    const averageDuration = validLogs.length > 0 ? totalTimeResisted / validLogs.length : 0;
+    const longestHold = validLogs.length > 0 ? Math.max(...validLogs.map(log => log.duration || 0)) : 0;
 
     return (
         <div className="space-y-6">
@@ -311,7 +408,7 @@ const TrendsView = ({ logs }) => {
                 <div className="grid grid-cols-2 gap-4 text-center">
                     <div className="bg-gray-100 p-4 rounded-lg">
                         <p className="text-sm text-gray-500">Total Cravings</p>
-                        <p className="text-2xl font-bold text-indigo-600">{logs.length}</p>
+                        <p className="text-2xl font-bold text-indigo-600">{validLogs.length}</p>
                     </div>
                     <div className="bg-gray-100 p-4 rounded-lg">
                         <p className="text-sm text-gray-500">Longest Hold</p>
@@ -326,7 +423,7 @@ const TrendsView = ({ logs }) => {
             
             <div>
                 <h3 className="text-lg font-semibold mb-2 text-gray-700">Craving Log</h3>
-                 <CalendarView logs={logs} />
+                 <CalendarView logs={validLogs} />
             </div>
 
             <div>
