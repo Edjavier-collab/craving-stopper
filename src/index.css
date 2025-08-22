@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes smooth-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes gentle-breathe {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes soft-glow-pulse {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.9;
+    filter: brightness(1.1);
+  }
+}
+
+.animate-smooth-pulse {
+  animation: smooth-pulse 3s ease-in-out infinite;
+}
+
+.animate-gentle-breathe {
+  animation: gentle-breathe 4s ease-in-out infinite;
+}
+
+.animate-soft-glow-pulse {
+  animation: soft-glow-pulse 2.5s ease-in-out infinite;
+}

@@ -6,6 +6,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Play, Square, History, BarChart2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 // --- Firebase Configuration (commented out for now) ---
 // const firebaseConfig = {
@@ -142,10 +143,15 @@ function AppContent() {
     };
 
     return (
-        <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-6">
-            <div className="max-w-sm mx-auto space-y-4">
+        <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-6 relative overflow-hidden">
+            {/* Background Zen Blobs */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-0 left-1/4 translate-y-1/2 w-80 h-80 bg-blue-200/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-1/3 right-0 translate-x-1/2 w-72 h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div className="max-w-sm mx-auto space-y-4 relative z-10">
                 {/* Header Widget */}
-                <div className="bg-neumo-200 rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
                     <h1 className="text-6xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
                         CRAVING STOPPER
                     </h1>
@@ -227,6 +233,45 @@ const Stopwatch = ({ onLog, logs = [] }) => {
         setIsRunning(false); // Ensure timer is stopped
     };
 
+    // --- Confetti Animation ---
+    const triggerConfetti = () => {
+        // Multiple bursts from different edges of the card
+        const colors = ['#93c5fd', '#74d4aa', '#ffffff', '#e0e7ff'];
+        
+        // Top-left burst
+        confetti({
+            particleCount: 30,
+            angle: 60,
+            spread: 45,
+            origin: { x: 0.3, y: 0.4 },
+            colors: colors,
+            gravity: 0.8,
+            drift: 0.1
+        });
+        
+        // Top-right burst
+        confetti({
+            particleCount: 30,
+            angle: 120,
+            spread: 45,
+            origin: { x: 0.7, y: 0.4 },
+            colors: colors,
+            gravity: 0.8,
+            drift: -0.1
+        });
+        
+        // Center burst
+        confetti({
+            particleCount: 40,
+            angle: 90,
+            spread: 60,
+            origin: { x: 0.5, y: 0.5 },
+            colors: colors,
+            gravity: 0.6,
+            scalar: 0.8
+        });
+    };
+
     const handleStart = () => {
         setTime(0); // Always reset time before starting
         setIsRunning(true);
@@ -236,6 +281,8 @@ const Stopwatch = ({ onLog, logs = [] }) => {
         setIsRunning(false);
         if (time > 0) { // Only log if time has passed
             onLog(time);
+            // Trigger celebration confetti
+            triggerConfetti();
         }
     };
 
@@ -265,15 +312,15 @@ const Stopwatch = ({ onLog, logs = [] }) => {
     return (
         <>
             {/* Timer Widget */}
-            <div className="bg-neumo-200 rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
                 <div className="text-center">
                     <div className={`bg-neumo-200 rounded-2xl p-6 mb-6 transition-all duration-300 ${
                         isRunning 
-                            ? 'shadow-[inset_4px_4px_8px_#c5c5c5,inset_-4px_-4px_8px_#ffffff,0_0_20px_rgba(74,222,128,0.6)] animate-pulse border-2 border-green-300' 
+                            ? 'shadow-[inset_4px_4px_8px_#c5c5c5,inset_-4px_-4px_8px_#ffffff,0_0_20px_rgba(74,222,128,0.6)] animate-smooth-pulse border-2 border-green-300' 
                             : 'shadow-neumo-inset'
                     }`}>
                         <div className={`font-mono text-4xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 ${
-                            isRunning && Math.floor(time / 1000) % 2 === 0 ? 'animate-pulse scale-105' : ''
+                            isRunning && Math.floor(time / 1000) % 2 === 0 ? 'animate-gentle-breathe' : ''
                         }`}>
                             {formatTime(time)}
                         </div>
@@ -296,7 +343,7 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                         }
                         <span className={`ml-2 text-2xl font-black tracking-wide ${
                             isRunning 
-                                ? 'text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.8)] animate-pulse' 
+                                ? 'text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.8)] animate-soft-glow-pulse' 
                                 : 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]'
                         } filter brightness-110 contrast-125`}>
                             {isRunning ? 'STOP' : 'START'}
@@ -369,7 +416,7 @@ const CalendarView = ({ logs }) => {
     }, {});
 
     return (
-        <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
             <div className="flex justify-between items-center mb-6">
                 <button onClick={prevMonth} className="p-2 rounded-full bg-neumo-200 shadow-neumo-sm hover:shadow-neumo-pressed transition-all duration-200"><ChevronLeft className="w-4 h-4 text-neumo-600" /></button>
                 <h2 className="font-medium text-neumo-700">{format(currentDate, 'MMMM yyyy')}</h2>
@@ -456,7 +503,7 @@ const TrendsView = ({ logs }) => {
             <CalendarView logs={validLogs} />
 
             {/* Chart Widget */}
-            <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
                 <h3 className="font-medium text-neumo-700 mb-4">Recent Sessions</h3>
                 <div className="h-48 w-full">
                     <ResponsiveContainer>
