@@ -146,8 +146,7 @@ function AppContent() {
             <div className="max-w-sm mx-auto space-y-4">
                 {/* Header Widget */}
                 <div className="bg-white rounded-3xl p-6 shadow-lg">
-                    <h1 className="text-xl font-medium text-stone-600 mb-1">You're doing great!! Keep Resisting 💪</h1>
-                    <p className="text-sm text-stone-400">Stay strong every day!</p>
+                    <h1 className="text-xl font-bold text-stone-700 text-center">Craving Stopper</h1>
                 </div>
 
                 {/* Main Content */}
@@ -272,17 +271,18 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                     
                     <button
                         onClick={handleButtonClick}
-                        className={`w-24 h-12 rounded-full flex items-center justify-center shadow-lg transform transition-all duration-200 active:scale-95 mx-auto ${
-                            isRunning ? 'bg-rose-200 text-rose-700' : 'bg-emerald-200 text-emerald-700'
+                        className={`w-40 h-16 rounded-full flex items-center justify-center shadow-xl border-2 transform transition-all duration-200 active:scale-95 mx-auto ${
+                            isRunning ? 'bg-rose-200 text-rose-700 border-rose-300 shadow-rose-200/50' : 'bg-emerald-200 text-emerald-700 border-emerald-300 shadow-emerald-200/50'
                         }`}
                     >
-                        {isRunning ? <Square size={20} /> : <Play size={20} className="ml-1" />}
-                        <span className="ml-2 text-sm font-medium">
+                        {isRunning ? <Square size={24} /> : <Play size={24} className="ml-1" />}
+                        <span className="ml-2 text-base font-semibold">
                             {isRunning ? 'Stop' : 'Start'}
                         </span>
                     </button>
                     
-                    <p className="text-stone-400 text-sm mt-4 px-4">
+                    <h2 className="text-base font-medium text-stone-600 mt-4 mb-2 text-center">You're doing great!! Keep Resisting 💪</h2>
+                    <p className="text-stone-400 text-sm mt-2 px-4">
                         {isRunning 
                             ? 'Press to stop and log your success!' 
                             : 'Press once to start. Press twice quickly to reset.'}
@@ -442,15 +442,7 @@ const TrendsView = ({ logs }) => {
                             }).length} sessions
                         </p>
                     </div>
-                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <span className="text-emerald-700 font-medium">
-                            {Math.round((validLogs.filter(log => {
-                                const weekAgo = new Date();
-                                weekAgo.setDate(weekAgo.getDate() - 7);
-                                return new Date(log.date) > weekAgo;
-                            }).length / 7) * 100)}%
-                        </span>
-                    </div>
+
                 </div>
                 <div className="w-full bg-stone-100 rounded-full h-2">
                     <div 
