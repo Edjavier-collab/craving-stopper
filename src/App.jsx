@@ -146,7 +146,7 @@ function AppContent() {
             <div className="max-w-sm mx-auto space-y-4">
                 {/* Header Widget */}
                 <div className="bg-white rounded-3xl p-6 shadow-lg">
-                    <h1 className="text-xl font-medium text-stone-600 mb-1">Hello, Focus</h1>
+                    <h1 className="text-xl font-medium text-stone-600 mb-1">You're doing great!! Keep Resisting 💪</h1>
                     <p className="text-sm text-stone-400">Stay strong every day!</p>
                 </div>
 
