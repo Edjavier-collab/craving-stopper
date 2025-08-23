@@ -221,13 +221,13 @@ function AppContent() {
     }
 
     return (
-        <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-2 xs:p-3 sm:p-4 md:p-6 relative overflow-hidden">
+        <div className="w-screen min-h-screen min-h-[100svh] bg-neumo-200 font-sans text-neumo-700 p-1 xs:p-2 sm:p-4 md:p-6 relative overflow-x-hidden flex items-center justify-center">
             {/* Background Zen Blobs */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-1/4 translate-y-1/2 w-80 h-80 bg-blue-200/15 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute top-1/3 right-0 translate-x-1/2 w-72 h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div className="w-full max-w-sm sm:max-w-md mx-auto space-y-3 sm:space-y-4 relative z-10 px-3 sm:px-4">
+            <div className="w-full max-w-full sm:max-w-md md:max-w-lg space-y-3 sm:space-y-4 relative z-10 px-3 xs:px-4 sm:px-6">
                 {/* Error Notification */}
                 {error && (
                     <div className="bg-soft-red rounded-2xl p-4 shadow-neumo border border-red-200">
@@ -240,12 +240,12 @@ function AppContent() {
 
                 {/* Header Widget - Only show on timer view */}
                 {view !== 'trends' && (
-                    <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
-                        <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase leading-tight" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
+                    <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-3 xs:p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
+                        <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase leading-tight" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
                             CRAVING STOPPER
                         </h1>
                         <div className="text-center mt-1 sm:mt-2">
-                            <div className="inline-block text-sm xs:text-base sm:text-lg md:text-xl font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
+                            <div className="inline-block text-xs xs:text-sm sm:text-base md:text-lg font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
                                 RESIST. OVERCOME. RESET.
                             </div>
                         </div>
@@ -258,7 +258,7 @@ function AppContent() {
                 {view === 'trends' && <TrendsView logs={logs} />}
 
                 {/* Navigation */}
-                <div className="flex space-x-2 sm:space-x-3">
+                <div className="flex space-x-2 xs:space-x-3">
                     <NavButton icon={History} label="Timer" active={view === 'timer'} onClick={() => setView('timer')} />
                     <NavButton icon={BarChart2} label="Trends" active={view === 'trends'} onClick={() => setView('trends')} />
                 </div>
@@ -421,14 +421,14 @@ const Stopwatch = ({ onLog, logs = [] }) => {
     return (
         <>
             {/* Timer Widget */}
-            <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
+            <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-3 xs:p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
                 <div className="text-center">
-                    <div className={`bg-neumo-200 rounded-2xl p-4 sm:p-6 mb-6 transition-all duration-300 overflow-hidden ${
+                    <div className={`bg-neumo-200 rounded-2xl p-3 xs:p-4 sm:p-6 mb-4 xs:mb-6 transition-all duration-300 overflow-hidden ${
                         isRunning 
                             ? 'shadow-[inset_4px_4px_8px_#c5c5c5,inset_-4px_-4px_8px_#ffffff,0_0_20px_rgba(74,222,128,0.6)] animate-smooth-pulse border-2 border-green-300' 
                             : 'shadow-neumo-inset'
                     }`}>
-                        <div className={`font-mono text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 overflow-hidden ${
+                        <div className={`font-mono text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 overflow-hidden ${
                             isRunning && Math.floor(time / 1000) % 2 === 0 ? 'animate-gentle-breathe' : ''
                         }`}>
                             {formatTime(time)}
@@ -440,7 +440,7 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                     
                     <button
                         onClick={handleButtonClick}
-                        className={`w-36 xs:w-40 h-14 xs:h-16 rounded-full flex items-center justify-center border-0 transition-all duration-200 mx-auto ${
+                        className={`w-32 xs:w-36 sm:w-40 h-12 xs:h-14 sm:h-16 rounded-full flex items-center justify-center border-0 transition-all duration-200 mx-auto ${
                             isRunning 
                                 ? 'bg-neumo-200 text-soft-red shadow-neumo-pressed' 
                                 : 'bg-gradient-to-b from-green-400 to-green-500 text-white shadow-md hover:scale-105 hover:shadow-lg active:shadow-neumo-pressed'
@@ -594,7 +594,7 @@ const TrendsView = ({ logs }) => {
     const longestHold = validLogs.length > 0 ? Math.max(...validLogs.map(log => log.duration || 0)) : 0;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3 xs:space-y-4">
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-2 xs:gap-3">
                 <div className="bg-neumo-200 p-3 xs:p-4 sm:p-5 rounded-2xl xs:rounded-3xl shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
