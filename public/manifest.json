@@ -1,0 +1,41 @@
+{
+  "name": "Craving Stopper",
+  "short_name": "CravingStopper",
+  "description": "Track and manage your cravings by timing how long you can resist them",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#dee2e6",
+  "theme_color": "#93c5fd",
+  "orientation": "portrait",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "any", 
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Timer",
+      "short_name": "Timer",
+      "description": "Quickly start a new craving resistance session",
+      "url": "/?action=timer",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "View Trends",
+      "short_name": "Trends", 
+      "description": "Check your progress and statistics",
+      "url": "/?action=trends",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

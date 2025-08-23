@@ -5,22 +5,26 @@
 @keyframes smooth-pulse {
   0%, 100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(0.96);
+    box-shadow: inset 4px 4px 8px #c5c5c5, inset -4px -4px 8px #ffffff, 0 0 15px rgba(74,222,128,0.5);
   }
   50% {
-    opacity: 0.9;
-    transform: scale(1.02);
+    opacity: 0.85;
+    transform: scale(1.06);
+    box-shadow: inset 4px 4px 8px #c5c5c5, inset -4px -4px 8px #ffffff, 0 0 40px rgba(74,222,128,0.9);
   }
 }
 
 @keyframes gentle-breathe {
   0%, 100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(0.97);
+    filter: brightness(0.95);
   }
   50% {
-    opacity: 0.95;
-    transform: scale(1.01);
+    opacity: 0.9;
+    transform: scale(1.07);
+    filter: brightness(1.15);
   }
 }
 
@@ -36,11 +40,11 @@
 }
 
 .animate-smooth-pulse {
-  animation: smooth-pulse 3s ease-in-out infinite;
+  animation: smooth-pulse 6s ease-in-out infinite;
 }
 
 .animate-gentle-breathe {
-  animation: gentle-breathe 4s ease-in-out infinite;
+  animation: gentle-breathe 7s ease-in-out infinite;
 }
 
 .animate-soft-glow-pulse {

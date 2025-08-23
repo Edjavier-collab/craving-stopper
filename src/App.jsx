@@ -1,27 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
-// Firebase imports commented out for now
-// import { initializeApp } from 'firebase/app';
-// import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-// import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query } from 'firebase/firestore';
+// Firebase imports
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Play, Square, History, BarChart2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// --- Firebase Configuration (commented out for now) ---
-// const firebaseConfig = {
-//     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY",
-//     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
-//     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
-//     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET",
-//     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
-//     appId: import.meta.env.VITE_FIREBASE_APP_ID || "YOUR_APP_ID"
-// };
+// --- Firebase Configuration ---
+const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY",
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET",
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || "YOUR_APP_ID"
+};
 
-// const appId = import.meta.env.VITE_FIREBASE_APP_ID || 'default-craving-stopper';
-// const app = initializeApp(firebaseConfig);
-// const auth = getAuth(app);
-// const db = getFirestore(app);
+const appId = import.meta.env.VITE_FIREBASE_APP_ID || 'default-craving-stopper';
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // --- Helper Functions ---
 const formatTime = (time) => {
@@ -65,22 +65,69 @@ function AppContent() {
     console.log('App component initializing...');
     
     const [view, setView] = useState('timer'); // 'timer', 'calendar', 'trends'
-    // const [user, setUser] = useState(null); // Not using Firebase auth for now
+    const [user, setUser] = useState(null);
     const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     
     console.log('App component rendered with view:', view, 'logs:', logs.length);
 
     // --- Authentication Effect ---
     useEffect(() => {
-        // Skip Firebase auth for now
-        console.log('Skipping Firebase auth');
+        console.log('Setting up Firebase auth...');
+        const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+            if (authUser) {
+                console.log('User signed in:', authUser.uid);
+                setUser(authUser);
+                setError(null);
+            } else {
+                console.log('No user, signing in anonymously...');
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error('Auth error:', error);
+                    setError('Authentication failed. Using offline mode.');
+                    setLoading(false);
+                }
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
     // --- Data Loading Effect ---
     useEffect(() => {
-        // Always use localStorage for now
-        loadFromLocalStorage();
-    }, []);
+        if (user) {
+            console.log('User authenticated, setting up Firestore listener...');
+            const userCollection = collection(db, 'artifacts', appId, 'users', user.uid, 'cravings');
+            const q = query(userCollection, orderBy('date', 'desc'));
+            
+            const unsubscribe = onSnapshot(q, 
+                (snapshot) => {
+                    console.log('Firestore data received:', snapshot.size, 'documents');
+                    const firestoreLogs = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        date: doc.data().date?.toDate() || new Date()
+                    }));
+                    setLogs(firestoreLogs);
+                    setLoading(false);
+                    setError(null);
+                },
+                (error) => {
+                    console.error('Firestore error:', error);
+                    setError('Failed to sync with cloud. Using local data.');
+                    loadFromLocalStorage();
+                    setLoading(false);
+                }
+            );
+            
+            return () => unsubscribe();
+        } else if (error) {
+            // If there's an auth error, use localStorage
+            loadFromLocalStorage();
+        }
+    }, [user, error]);
 
     // --- Load data from localStorage on app start ---
     // Removed - handled in main data loading effect
@@ -111,8 +158,25 @@ function AppContent() {
     // --- Add Log Function ---
     const addLog = async (duration) => {
         if (duration > 0) {
-            // Always use localStorage for now
-            saveToLocalStorage(duration);
+            if (user) {
+                try {
+                    console.log('Saving to Firestore...');
+                    const userCollection = collection(db, 'artifacts', appId, 'users', user.uid, 'cravings');
+                    await addDoc(userCollection, {
+                        duration: Number(duration),
+                        date: serverTimestamp()
+                    });
+                    console.log('Successfully saved to Firestore');
+                } catch (error) {
+                    console.error('Error saving to Firestore:', error);
+                    setError('Failed to save to cloud. Saved locally instead.');
+                    saveToLocalStorage(duration);
+                }
+            } else {
+                // Fallback to localStorage when no user
+                console.log('No user, saving to localStorage...');
+                saveToLocalStorage(duration);
+            }
         } else {
             console.log("Invalid duration, not logging");
         }
@@ -142,22 +206,46 @@ function AppContent() {
         }
     };
 
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-6 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="bg-neumo-200 rounded-3xl p-8 shadow-neumo">
+                        <div className="animate-pulse text-neumo-600 mb-4">Loading...</div>
+                        <div className="w-8 h-8 border-4 border-neumo-300 border-t-neumo-600 rounded-full animate-spin mx-auto"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-neumo-200 font-sans text-neumo-700 p-3 sm:p-4 md:p-6 relative overflow-hidden">
             {/* Background Zen Blobs */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-1/4 translate-y-1/2 w-80 h-80 bg-blue-200/15 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute top-1/3 right-0 translate-x-1/2 w-72 h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div className="max-w-sm mx-auto space-y-4 relative z-10">
+            <div className="w-full max-w-sm mx-auto space-y-3 sm:space-y-4 relative z-10 px-2 sm:px-0">
+                {/* Error Notification */}
+                {error && (
+                    <div className="bg-soft-red rounded-2xl p-4 shadow-neumo border border-red-200">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                            <span className="text-sm text-red-700">{error}</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Header Widget - Only show on timer view */}
                 {view !== 'trends' && (
-                    <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
-                        <h1 className="text-6xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
+                    <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase leading-tight" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
                             CRAVING STOPPER
                         </h1>
-                        <div className="text-center mt-2">
-                            <div className="inline-block text-2xl font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
+                        <div className="text-center mt-1 sm:mt-2">
+                            <div className="inline-block text-lg sm:text-xl md:text-2xl font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
                                 RESIST. OVERCOME. THRIVE.
                             </div>
                         </div>
@@ -170,7 +258,7 @@ function AppContent() {
                 {view === 'trends' && <TrendsView logs={logs} />}
 
                 {/* Navigation */}
-                <div className="flex space-x-3">
+                <div className="flex space-x-2 sm:space-x-3">
                     <NavButton icon={History} label="Timer" active={view === 'timer'} onClick={() => setView('timer')} />
                     <NavButton icon={BarChart2} label="Trends" active={view === 'trends'} onClick={() => setView('trends')} />
                 </div>
@@ -192,11 +280,11 @@ export default function App() {
 const NavButton = ({ icon: Icon, label, active, onClick }) => (
     <button
         onClick={onClick}
-        className={`bg-neumo-200 rounded-2xl p-4 flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
+        className={`bg-neumo-200 rounded-2xl p-3 sm:p-4 flex-1 flex flex-col items-center justify-center transition-all duration-200 min-h-[60px] ${
             active ? 'shadow-neumo-pressed' : 'shadow-neumo hover:shadow-neumo-sm'
         }`}
     >
-        <Icon className={`h-5 w-5 mb-2 ${
+        <Icon className={`h-4 w-4 sm:h-5 sm:w-5 mb-1 sm:mb-2 ${
             active ? 'text-neumo-700' : 'text-neumo-500'
         }`} />
         <span className={`text-xs font-medium ${
@@ -238,7 +326,26 @@ const Stopwatch = ({ onLog, logs = [] }) => {
     // --- Confetti Animation ---
     const triggerConfetti = () => {
         // Multiple bursts from different edges of the card
-        const colors = ['#93c5fd', '#74d4aa', '#ffffff', '#e0e7ff'];
+        const colors = [
+            '#ff6b6b', // red
+            '#4ecdc4', // teal
+            '#45b7d1', // blue
+            '#f9ca24', // yellow
+            '#f0932b', // orange
+            '#eb4d4b', // dark red
+            '#6c5ce7', // purple
+            '#fd79a8', // pink
+            '#00d2d3', // cyan
+            '#ff9ff3', // light pink
+            '#54a0ff', // bright blue
+            '#5f27cd', // dark purple
+            '#00d8ff', // light blue
+            '#ff9f43', // light orange
+            '#10ac84', // green
+            '#ffffff', // white
+            '#ffeaa7', // light yellow
+            '#dda0dd'  // plum
+        ];
         
         // Top-left burst
         confetti({
@@ -314,14 +421,14 @@ const Stopwatch = ({ onLog, logs = [] }) => {
     return (
         <>
             {/* Timer Widget */}
-            <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
+            <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
                 <div className="text-center">
-                    <div className={`bg-neumo-200 rounded-2xl p-6 mb-6 transition-all duration-300 ${
+                    <div className={`bg-neumo-200 rounded-2xl p-4 sm:p-6 mb-6 transition-all duration-300 overflow-hidden ${
                         isRunning 
                             ? 'shadow-[inset_4px_4px_8px_#c5c5c5,inset_-4px_-4px_8px_#ffffff,0_0_20px_rgba(74,222,128,0.6)] animate-smooth-pulse border-2 border-green-300' 
                             : 'shadow-neumo-inset'
                     }`}>
-                        <div className={`font-mono text-4xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 ${
+                        <div className={`font-mono text-2xl sm:text-3xl lg:text-4xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 overflow-hidden ${
                             isRunning && Math.floor(time / 1000) % 2 === 0 ? 'animate-gentle-breathe' : ''
                         }`}>
                             {formatTime(time)}
@@ -352,8 +459,8 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                         </span>
                     </button>
                     
-                    <h2 className="text-base font-medium text-neumo-700 mt-4 mb-2 text-center italic border border-neumo-300 rounded-lg py-2 px-4">You're doing great!! Keep Resisting 💪</h2>
-                    <p className="text-neumo-400 text-sm mt-2 px-4">
+                    <h2 className="text-sm sm:text-base font-medium text-neumo-700 mt-3 sm:mt-4 mb-2 text-center italic border border-neumo-300 rounded-lg py-2 px-3 sm:px-4">You&apos;re doing great!! Keep Resisting 💪</h2>
+                    <p className="text-neumo-400 text-xs sm:text-sm mt-2 px-2 sm:px-4">
                         {isRunning 
                             ? 'Press to stop and log your success!' 
                             : 'Press once to start. Press twice quickly to reset.'}
@@ -363,7 +470,7 @@ const Stopwatch = ({ onLog, logs = [] }) => {
             
             {/* Quick Stats Widget */}
             {logs.length > 0 && (
-                <div className="bg-neumo-200 rounded-3xl p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-neumo-200 rounded-3xl p-4 sm:p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center justify-between">
                         <div>
                             <div className="text-sm text-neumo-500">Today</div>
