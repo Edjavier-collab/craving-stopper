@@ -150,17 +150,19 @@ function AppContent() {
             <div className="absolute top-1/3 right-0 translate-x-1/2 w-72 h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
             
             <div className="max-w-sm mx-auto space-y-4 relative z-10">
-                {/* Header Widget */}
-                <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
-                    <h1 className="text-6xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
-                        CRAVING STOPPER
-                    </h1>
-                    <div className="text-center mt-2">
-                        <div className="inline-block text-2xl font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
-                            RESIST. OVERCOME. THRIVE.
+                {/* Header Widget - Only show on timer view */}
+                {view !== 'trends' && (
+                    <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
+                        <h1 className="text-6xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
+                            CRAVING STOPPER
+                        </h1>
+                        <div className="text-center mt-2">
+                            <div className="inline-block text-2xl font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
+                                RESIST. OVERCOME. THRIVE.
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Main Content */}
                 {view === 'timer' && <Stopwatch onLog={addLog} logs={logs} />}
