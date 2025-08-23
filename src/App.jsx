@@ -25,7 +25,7 @@ const db = getFirestore(app);
 
 // --- Helper Functions ---
 const formatTime = (time) => {
-    const milliseconds = `00${time % 1000}`.slice(-3);
+    const milliseconds = `0${Math.floor((time % 1000) / 10)}`.slice(-2);
     const seconds = `0${Math.floor(time / 1000) % 60}`.slice(-2);
     const minutes = `0${Math.floor(time / 60000) % 60}`.slice(-2);
     const hours = `0${Math.floor(time / 3600000)}`.slice(-2);
@@ -221,13 +221,13 @@ function AppContent() {
     }
 
     return (
-        <div className="w-screen min-h-screen min-h-[100svh] bg-neumo-200 font-sans text-neumo-700 p-1 xs:p-2 sm:p-4 md:p-6 relative overflow-x-hidden flex items-center justify-center">
+        <div className="min-h-[100dvh] bg-neumo-200 font-sans text-neumo-700 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] relative overflow-hidden">
             {/* Background Zen Blobs */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute bottom-0 left-1/4 translate-y-1/2 w-80 h-80 bg-blue-200/15 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute top-1/3 right-0 translate-x-1/2 w-72 h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-96 sm:h-96 bg-blue-100/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-0 left-1/4 translate-y-1/2 w-56 h-56 sm:w-80 sm:h-80 bg-blue-200/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-1/3 right-0 translate-x-1/2 w-48 h-48 sm:w-72 sm:h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div className="w-full max-w-full sm:max-w-md md:max-w-lg space-y-3 sm:space-y-4 relative z-10 px-3 xs:px-4 sm:px-6">
+            <div className="max-w-sm mx-auto px-4 sm:px-6 space-y-4 relative z-10">
                 {/* Error Notification */}
                 {error && (
                     <div className="bg-soft-red rounded-2xl p-4 shadow-neumo border border-red-200">
@@ -241,7 +241,7 @@ function AppContent() {
                 {/* Header Widget - Only show on timer view */}
                 {view !== 'trends' && (
                     <div className="bg-neumo-200/90 backdrop-blur-sm rounded-3xl p-3 xs:p-4 sm:p-6 lg:p-8 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
-                        <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase leading-tight" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
+                        <h1 className="text-[clamp(1.75rem,8vw,3rem)] font-black text-center text-blue-300 drop-shadow-[0_0_25px_rgba(147,197,253,0.6)] tracking-wider uppercase leading-tight" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.5), -2px -2px 4px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.8)', WebkitTextStroke: '1px rgba(0,0,0,0.2)'}}>
                             CRAVING STOPPER
                         </h1>
                         <div className="text-center mt-1 sm:mt-2">
@@ -323,6 +323,7 @@ const Stopwatch = ({ onLog, logs = [] }) => {
         setIsRunning(false); // Ensure timer is stopped
     };
 
+
     // --- Confetti Animation ---
     const triggerConfetti = () => {
         // Multiple bursts from different edges of the card
@@ -381,6 +382,8 @@ const Stopwatch = ({ onLog, logs = [] }) => {
         });
     };
 
+
+
     const handleStart = () => {
         setTime(0); // Always reset time before starting
         setIsRunning(true);
@@ -428,7 +431,7 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                             ? 'shadow-[inset_4px_4px_8px_#c5c5c5,inset_-4px_-4px_8px_#ffffff,0_0_20px_rgba(74,222,128,0.6)] animate-smooth-pulse border-2 border-green-300' 
                             : 'shadow-neumo-inset'
                     }`}>
-                        <div className={`font-mono text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 overflow-hidden ${
+                        <div className={`font-mono text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-neumo-800 tracking-wide transition-transform duration-100 overflow-hidden ${
                             isRunning && Math.floor(time / 1000) % 2 === 0 ? 'animate-gentle-breathe' : ''
                         }`}>
                             {formatTime(time)}
@@ -440,7 +443,7 @@ const Stopwatch = ({ onLog, logs = [] }) => {
                     
                     <button
                         onClick={handleButtonClick}
-                        className={`w-32 xs:w-36 sm:w-40 h-12 xs:h-14 sm:h-16 rounded-full flex items-center justify-center border-0 transition-all duration-200 mx-auto ${
+                        className={`w-full sm:w-40 h-14 sm:h-16 rounded-full flex items-center justify-center border-0 transition-all duration-200 mx-auto ${
                             isRunning 
                                 ? 'bg-neumo-200 text-soft-red shadow-neumo-pressed' 
                                 : 'bg-gradient-to-b from-green-400 to-green-500 text-white shadow-md hover:scale-105 hover:shadow-lg active:shadow-neumo-pressed'
@@ -531,7 +534,7 @@ const CalendarView = ({ logs }) => {
                 <h2 className="font-medium text-neumo-700 text-sm xs:text-base">{format(currentDate, 'MMMM yyyy')}</h2>
                 <button onClick={nextMonth} className="p-2 rounded-full bg-neumo-200 shadow-neumo-sm hover:shadow-neumo-pressed transition-all duration-200"><ChevronRight className="w-4 h-4 text-neumo-600" /></button>
             </div>
-            <div className="grid grid-cols-7 gap-1 xs:gap-2 text-center text-xs text-neumo-400 mb-3">
+            <div className="grid grid-cols-7 gap-1 xs:gap-2 text-center text-xs sm:text-sm text-neumo-400 mb-3">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day} className="font-medium">{day}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-1 xs:gap-2">
@@ -550,11 +553,11 @@ const CalendarView = ({ logs }) => {
                     }
 
                     return (
-                        <div key={day.toString()} className={`h-7 w-7 xs:h-8 xs:w-8 flex items-center justify-center rounded-lg text-xs xs:text-sm font-medium relative ${intensityClass}`}>
-                            <span className={`${isSameDay(day, new Date()) ? 'bg-neumo-700 text-white rounded-lg h-6 w-6 xs:h-7 xs:w-7 flex items-center justify-center text-xs' : 'text-neumo-600'}`}>
+                        <div key={day.toString()} className={`h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center rounded-lg text-xs sm:text-sm font-medium relative ${intensityClass}`}>
+                            <span className={`${isSameDay(day, new Date()) ? 'bg-neumo-700 text-white rounded-lg h-5 w-5 sm:h-7 sm:w-7 flex items-center justify-center text-xs' : 'text-neumo-600'}`}>
                                 {format(day, 'd')}
                             </span>
-                            {hasLogs && <div className="absolute -bottom-0.5 -right-0.5 xs:-bottom-1 xs:-right-1 h-1.5 w-1.5 xs:h-2 xs:w-2 bg-blue-300 rounded-full shadow-neumo-sm"></div>}
+                            {hasLogs && <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-1 w-1 sm:h-2 sm:w-2 bg-blue-300 rounded-full shadow-neumo-sm"></div>}
                         </div>
                     );
                 })}
@@ -614,8 +617,8 @@ const TrendsView = ({ logs }) => {
             {/* Chart Widget */}
             <div className="bg-neumo-200/90 backdrop-blur-sm rounded-2xl xs:rounded-3xl p-4 xs:p-6 shadow-neumo hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-white/20">
                 <h3 className="font-medium text-neumo-700 mb-3 xs:mb-4 text-sm xs:text-base">Recent Sessions</h3>
-                <div className="h-40 xs:h-48 w-full">
-                    <ResponsiveContainer>
+                <div className="h-56 min-h-[200px] sm:h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data.slice(-7)} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#ced4da" />
                             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6c757d' }} />

@@ -41,4 +41,16 @@ export default {
     },
   },
   plugins: [],
+  safelist: [
+    'text-[clamp(1.75rem,8vw,3rem)]',
+    'min-h-[100dvh]',
+    'pt-[env(safe-area-inset-top)]',
+    'pb-[env(safe-area-inset-bottom)]',
+    'h-56',
+    'min-h-[200px]',
+    'h-6',
+    'w-6',
+    'h-5',
+    'w-5'
+  ]
 }
