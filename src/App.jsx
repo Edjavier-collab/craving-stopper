@@ -225,7 +225,7 @@ function AppContent() {
             {/* Background Zen Blobs */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-96 sm:h-96 bg-blue-100/20 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-1/4 translate-y-1/2 w-56 h-56 sm:w-80 sm:h-80 bg-blue-200/15 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute top-1/3 right-0 translate-x-1/2 w-48 h-48 sm:w-72 sm:h-72 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-1/3 right-0 w-32 h-32 sm:w-72 sm:h-72 sm:translate-x-1/2 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
             
             <div className="max-w-sm mx-auto px-4 sm:px-6 space-y-4 relative z-10">
                 {/* Error Notification */}
