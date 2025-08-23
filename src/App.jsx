@@ -246,7 +246,7 @@ function AppContent() {
                         </h1>
                         <div className="text-center mt-1 sm:mt-2">
                             <div className="inline-block text-lg sm:text-xl md:text-2xl font-medium text-neumo-500 tracking-wider drop-shadow-[0_0_10px_rgba(75,85,99,0.3)]">
-                                RESIST. OVERCOME. THRIVE.
+                                RESIST. OVERCOME. RESET.
                             </div>
                         </div>
                     </div>
