@@ -5,23 +5,62 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
-import { ChevronLeft, ChevronRight, Play, Square, History, BarChart2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Square, History, BarChart2, WifiOff, Cloud, CloudOff } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY",
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET",
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || "YOUR_APP_ID"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const appId = import.meta.env.VITE_FIREBASE_APP_ID || 'default-craving-stopper';
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Validate Firebase configuration
+const validateFirebaseConfig = () => {
+    const requiredFields = [
+        'apiKey', 'authDomain', 'projectId', 'storageBucket', 
+        'messagingSenderId', 'appId'
+    ];
+    
+    const missing = requiredFields.filter(field => !firebaseConfig[field]);
+    
+    if (missing.length > 0) {
+        console.warn(`Missing Firebase configuration: ${missing.join(', ')}`);
+        console.warn('App will run in offline mode using localStorage only.');
+        return false;
+    }
+    
+    // Check for placeholder values
+    const hasPlaceholders = Object.values(firebaseConfig).some(value => 
+        typeof value === 'string' && value.startsWith('YOUR_')
+    );
+    
+    if (hasPlaceholders) {
+        console.warn('Firebase configuration contains placeholder values. Please update your .env file.');
+        return false;
+    }
+    
+    return true;
+};
+
+const isFirebaseConfigured = validateFirebaseConfig();
+const appId = import.meta.env.VITE_APP_ID || import.meta.env.VITE_FIREBASE_APP_ID || 'default-craving-stopper';
+
+let app, auth, db;
+
+if (isFirebaseConfigured) {
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize Firebase:', error);
+    }
+}
 
 // --- Helper Functions ---
 const formatTime = (time) => {
@@ -69,17 +108,48 @@ function AppContent() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [connectionStatus, setConnectionStatus] = useState({
+        isOnline: navigator.onLine,
+        isFirebaseConnected: false
+    });
     
     console.log('App component rendered with view:', view, 'logs:', logs.length);
 
+    // --- Online/Offline Status Effect ---
+    useEffect(() => {
+        const handleOnline = () => {
+            setConnectionStatus(prev => ({ ...prev, isOnline: true }));
+        };
+        
+        const handleOffline = () => {
+            setConnectionStatus(prev => ({ ...prev, isOnline: false }));
+        };
+        
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
     // --- Authentication Effect ---
     useEffect(() => {
+        if (!isFirebaseConfigured || !auth) {
+            console.log('Firebase not configured, using offline mode');
+            setError('Firebase not configured. Using offline mode.');
+            setLoading(false);
+            return;
+        }
+
         console.log('Setting up Firebase auth...');
         const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
             if (authUser) {
                 console.log('User signed in:', authUser.uid);
                 setUser(authUser);
                 setError(null);
+                setConnectionStatus(prev => ({ ...prev, isFirebaseConnected: true }));
             } else {
                 console.log('No user, signing in anonymously...');
                 try {
@@ -87,6 +157,7 @@ function AppContent() {
                 } catch (error) {
                     console.error('Auth error:', error);
                     setError('Authentication failed. Using offline mode.');
+                    setConnectionStatus(prev => ({ ...prev, isFirebaseConnected: false }));
                     setLoading(false);
                 }
             }
@@ -97,7 +168,7 @@ function AppContent() {
 
     // --- Data Loading Effect ---
     useEffect(() => {
-        if (user) {
+        if (user && db) {
             console.log('User authenticated, setting up Firestore listener...');
             const userCollection = collection(db, 'artifacts', appId, 'users', user.uid, 'cravings');
             const q = query(userCollection, orderBy('date', 'desc'));
@@ -117,14 +188,15 @@ function AppContent() {
                 (error) => {
                     console.error('Firestore error:', error);
                     setError('Failed to sync with cloud. Using local data.');
+                    setConnectionStatus(prev => ({ ...prev, isFirebaseConnected: false }));
                     loadFromLocalStorage();
                     setLoading(false);
                 }
             );
             
             return () => unsubscribe();
-        } else if (error) {
-            // If there's an auth error, use localStorage
+        } else if (error || !isFirebaseConfigured) {
+            // If there's an auth error or Firebase not configured, use localStorage
             loadFromLocalStorage();
         }
     }, [user, error]);
@@ -158,7 +230,7 @@ function AppContent() {
     // --- Add Log Function ---
     const addLog = async (duration) => {
         if (duration > 0) {
-            if (user) {
+            if (user && db && isFirebaseConfigured) {
                 try {
                     console.log('Saving to Firestore...');
                     const userCollection = collection(db, 'artifacts', appId, 'users', user.uid, 'cravings');
@@ -173,8 +245,8 @@ function AppContent() {
                     saveToLocalStorage(duration);
                 }
             } else {
-                // Fallback to localStorage when no user
-                console.log('No user, saving to localStorage...');
+                // Fallback to localStorage when no user or Firebase not configured
+                console.log('No user or Firebase not configured, saving to localStorage...');
                 saveToLocalStorage(duration);
             }
         } else {
@@ -228,6 +300,27 @@ function AppContent() {
             <div className="absolute top-1/3 right-0 w-32 h-32 sm:w-72 sm:h-72 sm:translate-x-1/2 bg-blue-50/25 rounded-full blur-3xl pointer-events-none"></div>
             
             <div className="max-w-sm mx-auto px-4 sm:px-6 space-y-4 relative z-10">
+                {/* Connection Status Indicator */}
+                <div className="flex justify-end">
+                    <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                        connectionStatus.isOnline && connectionStatus.isFirebaseConnected 
+                            ? 'bg-green-100 text-green-700 border border-green-200' 
+                            : connectionStatus.isOnline 
+                                ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                : 'bg-red-100 text-red-700 border border-red-200'
+                    }`}>
+                        {connectionStatus.isOnline ? (
+                            connectionStatus.isFirebaseConnected ? (
+                                <><Cloud className="w-3 h-3" /> <span>Synced</span></>
+                            ) : (
+                                <><CloudOff className="w-3 h-3" /> <span>Local only</span></>
+                            )
+                        ) : (
+                            <><WifiOff className="w-3 h-3" /> <span>Offline</span></>
+                        )}
+                    </div>
+                </div>
+
                 {/* Error Notification */}
                 {error && (
                     <div className="bg-soft-red rounded-2xl p-4 shadow-neumo border border-red-200">
