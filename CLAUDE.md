@@ -104,12 +104,19 @@ artifacts/{APP_ID}/users/{USER_UID}/cravings/
 
 ### Environment Configuration
 Firebase configuration with robust validation:
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN` 
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
+
+**Setup Instructions**:
+1. Copy `.env.example` to `.env`
+2. Replace placeholder values with your actual Firebase configuration from Firebase Console
+3. Never commit the actual `.env` file to git (it's already in `.gitignore`)
+
+**Environment Variables**:
+- `VITE_FIREBASE_API_KEY` - Your Firebase API key
+- `VITE_FIREBASE_AUTH_DOMAIN` - Your Firebase auth domain
+- `VITE_FIREBASE_PROJECT_ID` - Your Firebase project ID
+- `VITE_FIREBASE_STORAGE_BUCKET` - Your Firebase storage bucket
+- `VITE_FIREBASE_MESSAGING_SENDER_ID` - Your Firebase messaging sender ID
+- `VITE_FIREBASE_APP_ID` - Your Firebase app ID
 - `VITE_APP_ID` (optional override for Firebase app identification)
 
 ### Enhanced Styling & Animations
