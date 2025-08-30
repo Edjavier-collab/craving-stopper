@@ -28,6 +28,35 @@ npm run preview
 ```
 Serves the production build locally for testing
 
+## Deployment
+
+### Vercel Deployment
+This app is configured for seamless Vercel deployment with the included `vercel.json` configuration.
+
+**Quick Deploy:**
+1. Install Vercel CLI: `npm i -g vercel`
+2. Run: `vercel` and follow the prompts
+3. Configure environment variables in Vercel dashboard
+
+**GitHub Integration:**
+1. Push code to GitHub repository
+2. Import project on [vercel.com](https://vercel.com)
+3. Auto-deploy on every push to main branch
+
+**Environment Variables Required on Vercel:**
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_APP_ID` (optional)
+
+**Post-Deployment:**
+1. Add your Vercel domain to Firebase authorized domains
+2. Test all functionality on production URL
+3. Consider setting up custom domain
+
 ## Architecture Overview
 
 ### Core Structure
